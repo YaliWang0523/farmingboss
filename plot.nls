@@ -1,0 +1,7 @@
+to Update-amount-plot
+  set-current-plot-pen "stock"
+  plot count patches with [torf-empty = false]
+  set-current-plot-pen "fruits-create"
+  plot current-fruits-create * 產期 / 2
+end
+

@@ -1,0 +1,254 @@
+;; fruits
+breed [fruits fruit]
+breed [wholesalers_1 wholesaler_1]
+breed [wholesalers_2 wholesaler_2]
+breed [consumers consumer]
+
+wholesalers_2-own [target-region]
+
+consumers-own [target-region]
+fruits-own [level  fruit-energy]
+patches-own [patch-energy]
+
+turtles-own [tur-region]
+
+;; fruits
+to Create-fruits-by-setting
+  set current-fruits-create 0
+  if (ticks < 產期 * 2) ;;一天二個ticks
+  [
+    ifelse (產量常態分佈 = false)
+    [
+      set current-fruits-create round(random (估計總產量 - total-fruits-create) / (產期 - (ticks / 2)))
+      Crt-fruits current-fruits-create
+      set total-fruits-create total-fruits-create + current-fruits-create
+    ]
+    [
+      ifelse (ticks < 產期)
+      [
+        set current-fruits-create (item (ticks * 2) random-normal-number * round(估計總產量 / sum(random-normal-number)))
+        Crt-fruits current-fruits-create
+      ]
+      [
+        set current-fruits-create (item (((產期 * 2) - (ticks - 產期) * 2) - 1) random-normal-number * round(估計總產量 / sum(random-normal-number)) )
+        Crt-fruits current-fruits-create
+      ]
+    ]
+  ]
+end
+
+to Crt-fruits [number]
+  create-fruits number [
+    setxy min-pxcor + 1 ut_random-between ((item 3 item 0 region-boundaries) - 1) ((item 2 item 0 region-boundaries) + 1)
+    set shape "orbit 1"
+    set tur-region 1
+    let level-l random 4
+    set level level-l
+    set color 5 + (10 * level-l)
+    set fruit-energy init-energy
+  ]
+  set all-fruits all-fruits + number
+end
+
+;; wholes_1
+to Crt-wholesaler_1 [number]
+ let whole-number 2
+  let region-max-pxcor (item 1 item 0 region-boundaries) - 1
+  create-wholesalers_1 number [ ;;count patches with [pcolor = region-bg-color + whole-number] [
+    setxy region-max-pxcor  ut_random-between ((item 3 item (whole-number - 1) region-boundaries) - 1) ((item 2 item (whole-number - 1) region-boundaries) + 1)
+    set shape "flag"
+    set tur-region 1
+    set color pink
+  ]
+end
+
+;; wholes_2
+to Crt-wholesaler_2
+   let whole-number 3
+  let region-max-pxcor (item 1 item 0 region-boundaries) - 1
+  create-wholesalers_2 count patches with [pcolor = region-bg-color + whole-number] [
+    setxy region-max-pxcor  ut_random-between ((item 3 item (whole-number - 1) region-boundaries) - 1) ((item 2 item (whole-number - 1) region-boundaries) + 1)
+    set shape "default"
+    set tur-region 1
+    set target-region whole-number
+    set color 96
+  ]
+  
+end
+
+;; wholes_3
+to Crt-wholesaler_3
+   let whole-number 4
+  let region-max-pxcor (item 1 item 0 region-boundaries) - 1
+  create-wholesalers_2 count patches with [pcolor = region-bg-color + whole-number] [
+    setxy region-max-pxcor  ut_random-between ((item 3 item (whole-number - 1) region-boundaries) - 1) ((item 2 item (whole-number - 1) region-boundaries) + 1)
+    set shape "default"
+    set tur-region 1
+    set target-region whole-number
+    set color 86
+  ]
+  
+end
+
+;; wholes_4
+to Crt-wholesaler_4
+   let whole-number 5
+  let region-max-pxcor (item 1 item 0 region-boundaries) - 1
+  create-wholesalers_2 count patches with [pcolor = region-bg-color + whole-number] [
+    setxy region-max-pxcor  ut_random-between ((item 3 item (whole-number - 1) region-boundaries) - 1) ((item 2 item (whole-number - 1) region-boundaries) + 1)
+    set shape "default"
+    set tur-region 1
+    set target-region whole-number
+    set color 76
+  ]
+  
+end
+
+
+;; wholes_1
+to Crt-consumer
+  
+  create-consumers 100 [
+    let consumer_region_number 2 + random 3
+    setxy  (item 1 item consumer_region_number region-boundaries) - 1  ut_random-between ((item 3 item (consumer_region_number ) region-boundaries) - 1) ((item 2 item (consumer_region_number) region-boundaries) + 1)
+    set shape "person"
+    set target-region consumer_region_number
+    set tur-region consumer_region_number
+    set color 9.9
+  ]
+  
+end
+
+
+;; 移動
+to Fruits-move
+  ask fruits [
+    wiggle
+    forward 1
+    keep-in-region tur-region
+    set fruit-energy fruit-energy - 1
+    if (fruit-energy = 0)
+    [
+      set 耗損 耗損 + 1
+      die
+    ]
+  ]
+end
+
+to Wholesalers-move
+  ask turtles with [breed = wholesalers_1 or breed = wholesalers_2 ] [
+    wiggle
+    forward 1
+    keep-in-region tur-region 
+    ifelse(breed = wholesalers_2)[
+      whole-eat]
+    [
+      farmingbass-eat
+    ]
+  ]
+end
+
+to Consumers-move
+  ask turtles with [breed = consumers] [
+    wiggle
+    forward 1
+    keep-in-region tur-region + 1
+    consumer_eat
+  ]
+
+end
+
+to farmingbass-eat
+   if any? fruits-here[
+    let target one-of fruits-here
+    set 銷貨4 銷貨4 + 1
+    ask target[
+      die
+    ]
+     die
+  ]
+end
+
+to whole-eat
+  if any? fruits-here[
+    let target one-of fruits-here
+
+    let tar target-region
+    ifelse(tar = 5)
+    [set 進貨1 進貨1 + 1]
+    [ifelse(tar = 4)[set 進貨2 進貨2 + 1][set 進貨3 進貨3 + 1]]
+    ask one-of patches with[region = tar and torf-empty = true] [
+      set pcolor pcolor + 30 
+      set patch-energy [fruit-energy] of target
+      set torf-empty false
+    ]
+    ask target[
+      die
+    ]
+     die
+  ]
+
+end
+
+
+to consumer_eat
+  if torf-empty  = false
+  [
+    set pcolor pcolor - 30
+    set torf-empty true
+    set patch-energy 0
+    let tar target-region
+    ifelse(tar = 2)
+    [set 銷貨3 銷貨3 + 1]
+    [ifelse(tar = 3)[set 銷貨2 銷貨2 + 1][set 銷貨1 銷貨1 + 1]]
+    die
+  ]
+  
+end
+
+to Wholesales-stock-energy
+   ask patches with [patch-energy != 0 ] [
+    set patch-energy patch-energy - 1
+    if(patch-energy = 0)
+    [
+      set pcolor pcolor - 30
+      set torf-empty true
+      let tar region
+      ifelse(tar = 3)
+      [set 耗損3 耗損3 + 1]
+      [ifelse(tar = 4)[set 耗損2 耗損2 + 1][set 耗損1 耗損1 + 1]]
+    ]
+    
+  ]
+  
+end
+
+;; 移動-轉向
+to wiggle
+  right random 90 ;; 向右轉(隨機0~89)
+  left random 90  ;; 向左轉(隨機0~89)
+end
+
+;; 移動- 判斷在 region 內
+to keep-in-region [ which-region ] ; turtle procedure
+;; 判斷turtle 的位置，如果在移動會超出邊界就不移動
+  if region != which-region [
+    let region-min-pxcor (item 0 item (which-region - 1) region-boundaries) + 1
+    let region-max-pxcor (item 1 item (which-region - 1) region-boundaries) - 1
+    let region-min-pycor (item 2 item (which-region - 1) region-boundaries) + 1
+    let region-max-pycor (item 3 item (which-region - 1) region-boundaries) - 1
+
+    if xcor < region-min-pxcor [ 
+      set xcor region-min-pxcor
+    ]
+    if xcor > region-max-pxcor [ 
+      set xcor region-max-pxcor 
+    ]
+    if ycor < region-min-pycor [ 
+      set ycor region-min-pycor
+    ]
+    if ycor > region-max-pycor [ 
+      set ycor region-max-pycor 
+    ]
+  ]
+end

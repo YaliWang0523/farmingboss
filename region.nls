@@ -1,0 +1,81 @@
+patches-own[
+  region
+  torf-empty
+]
+
+;; region global function
+;; 劃分區域
+to Setup-regions
+  let regions-x [30 70] ;; 切割區塊， 垂直 的地方, 比例：第一塊的大小 = 0 * all /(0 + 1)
+  let regions-y [10 40 30 20] ;; 切割區塊， 垂直 的地方
+  let regions-xy (list regions-x regions-y)
+  let division_xy region-divisions regions-xy
+  set region-boundaries division_xy
+  draw-region-division  division_xy
+end
+
+
+;; region local function
+
+;; 計算要劃分的座標
+;; 回傳 :[ [區塊0最小x 區塊0最大x 區塊0最小y 區塊0最大y ] [區塊1最小x 區塊1最大x 區塊1最小y 區塊1最大y ].......]
+to-report region-divisions [regions-list]
+  ;; 取得左邊切割
+  let regions-x item 0 regions-list
+  let first-pxcor [ pxcor ] of patch( min-pxcor + (item 0 regions-x) * ((max-pxcor - min-pxcor) / sum regions-x))0  
+  let result (list (list min-pxcor first-pxcor min-pycor max-pycor)) ;; 切出第一塊
+  
+  ;;取得右邊切割
+  let regions-y item 1 regions-list
+  let sum-pre 0.00
+  let regions-y-sumpre [0]
+  foreach  regions-y [ n ->
+    ifelse sum-pre != 0 [
+      let sum-pre-before-add sum-pre
+      set sum-pre sum-pre + n
+
+      let max-y [ pycor ] of patch 0 (min-pycor + (sum-pre  * ((max-pycor - min-pycor) / sum regions-y))) 
+      let pre-y [ pycor ] of patch 0 (min-pycor + (sum-pre-before-add  * ((max-pycor - min-pycor) / sum regions-y))) 
+      set result lput(list first-pxcor max-pxcor pre-y max-y) result
+    ][
+      set sum-pre n
+      let max-y  [ pycor ] of patch 0 (min-pycor + (sum-pre  * ((max-pycor - min-pycor) / sum regions-y))) 
+      set result lput(list first-pxcor max-pxcor min-pycor max-y) result
+    ]
+  ]
+
+  report  result
+end
+
+;; 畫出區塊，上色，且給每個 patches 所屬位置號碼
+to draw-region-division [cors]
+  ask patches [set pcolor grey + 1.0 
+    set torf-empty true]
+  let region-number 1
+  foreach cors [ cor ->
+    ifelse item 0 cor = min-pxcor [
+      ask patches with [pxcor > item 0 cor and pxcor < item 1 cor and pycor > item 2 cor and pycor < item 3 cor][
+        set pcolor region-bg-color + region-number
+        set region region-number
+        ;set plabel region
+      ]
+    ]
+    [
+      ask patches with [pxcor > item 0 cor and pxcor < item 1 cor and pycor > item 2 cor and pycor < item 3 cor][
+        set pcolor region-bg-color + region-number
+        set region region-number
+        ;set plabel region
+      ]
+    ]
+    set region-number region-number + 1
+    
+    ;; 給外框及分隔線 patches 編號0
+    ask patches with [pcolor = (grey + 1.0)]
+    [
+      set region 0
+      ;set plabel region
+    ]
+  ] 
+end
+
+

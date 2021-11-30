@@ -1,0 +1,5 @@
+
+;; 取範圍隨機值
+to-report ut_random-between [ min-num max-num ]
+    report random-float (max-num - min-num) + min-num
+end

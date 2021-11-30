@@ -1,0 +1,14 @@
+
+breed [fruits fruit]
+fruits-own[
+  goal
+]
+
+to fruits-move
+  ask fruits [
+    let current-region region
+    wiggle
+    forward 1
+    keep-in-region current-region
+  ]
+end
