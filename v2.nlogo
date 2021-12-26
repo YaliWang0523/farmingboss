@@ -391,41 +391,76 @@ NIL
 HORIZONTAL
 
 @#$#@#$#@
+# 農產品銷售模擬
 ## WHAT IS IT?
 
-(a general understanding of what the model is trying to show or explain)
+模擬農產品市場，各個角色之間競爭關係，最終總體的有效銷售量。
 
 ## HOW IT WORKS
+### 區塊
+#### 1. 左邊為生產交易市場
+農產品生產後銷售給中間商。
+#### 2. 右邊為終端交易市場
+##### 模式1. 中間商在生產交易市場中向生產者購買後，進行庫存，再銷售給終端消費者。
+##### 模式2. 消費者產生購買需求，中間商才向生產者購買，直接銷售給終端消費者。 
 
-(what rules the agents use to create the overall behavior of the model)
+### 角色
+#### 1. 農產品
+整個生態系統最主要的角色，因農產品的產出而開始整個系統運作，所有農產品完成生命週期後結束系統模擬。農產品完成生命週期有二種方式，一、銷售至終端消費者。二、農產品具有保存期限，在保存期限內若未被終端消費者購買則形成耗損，離開系統。
+
+### 2. 中間商
+中間商具有區塊中所描述的二種模式，模式一中，中間商可以有多個，每個具有自己的區塊，區塊大小代表中間商在市場所佔比例。以目前農產品交易為例，有三種主要中間商：一、行口。二、果菜拍賣市場，例：北拍。三、當地果菜市場。
+而模式二中的中間商，主要代表為網路銷售管道，包含透過各個電商平台或是社群團購。與模式一最大差異在於無庫存，會在消費者有購買需求時，中間商直接在生產交易市場中交易後，銷售給終端消費者。
+
+
 
 ## HOW TO USE IT
 
-(how to use the model, including a description of each of the items in the Interface tab)
+### Step1 : 設定中間商的區塊大小，在region.nls function Setup-regions 裡。
+### Step2 : 設定初始設定
+#### 產期：農產品整體產期天數
+#### 估計總產值：整個產期內，預估的總產量。
+#### 產量常態分佈：是 - 產量依產期呈現常態分佈。否 - 產量為隨機數。
+#### 保存期限：農產品的保存期限，
+
 
 ## THINGS TO NOTICE
 
-(suggested things for the user to notice while running the model)
+### 有效銷售量 : 農產品被終端消費者購買的量。
+### 總耗損量：農產品未在有效期內被終端消費者購買，而形成耗損的數量。
+### 生產交易市場
+#### 總產量
+#### 銷售量 : 販售給中間商的數量
+#### 耗損量 : 農產品於有效期內未被中間商購買而形成耗損的數量。
+### 各中間商區塊
+#### 進貨量 : 中間商向生產者購買的數量
+#### 銷售量 : 中間商販售給終端消費者的量
+#### 耗損量 : 農產品被中間商購買進庫存後，未在有效期內被販售給終端消費者。
 
 ## THINGS TO TRY
 
-(suggested things for the user to try to do (move sliders, switches, etc.) with the model)
+#### 產期：農產品整體產期天數
+#### 估計總產值：整個產期內，預估的總產量。
+#### 產量常態分佈：是 - 產量依產期呈現常態分佈。否 - 產量為隨機數。
+#### 保存期限：農產品的保存期限，#### 產期：農產品整體產期天數
+#### 估計總產值：整個產期內，預估的總產量。
+#### 產量常態分佈：是 - 產量依產期呈現常態分佈。否 - 產量為隨機數。
+#### 保存期限：農產品的保存期限，
 
 ## EXTENDING THE MODEL
 
-(suggested things to add or change in the Code tab to make the model more complicated, detailed, accurate, etc.)
 
 ## NETLOGO FEATURES
 
-(interesting or unusual features of NetLogo that the model uses, particularly in the Code tab; or where workarounds were needed for missing features)
+### 1. 交易市場機制下產生的價格
+### 2. 中間商改變價格對其他中間商的終端消費者產生推或拉的力量。
 
 ## RELATED MODELS
 
-(models in the NetLogo Models Library and elsewhere which are of related interest)
+
 
 ## CREDITS AND REFERENCES
-
-(a reference to the model's URL on the web if it has one, as well as any other necessary credits, citations, and links)
+<https://github.com/YaliWang0523/farmingboss>
 @#$#@#$#@
 default
 true
